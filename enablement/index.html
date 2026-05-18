@@ -1,1 +1,408 @@
-placeholder text
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lightyear Content Hub</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f5f7; color: #111827; }
+
+  .hub { padding: 24px 20px 40px; max-width: 1100px; margin: 0 auto; }
+
+  /* Header */
+  .hub-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  .hub-title { font-size: 20px; font-weight: 700; color: #111827; letter-spacing: -0.02em; }
+  .hub-subtitle { font-size: 13px; color: #6b7280; margin-top: 3px; }
+  .hub-count { font-size: 12px; color: #9ca3af; background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; padding: 4px 12px; white-space: nowrap; align-self: center; }
+
+  /* Filters */
+  .filters { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 12px; }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
+  .filter-label { font-size: 10px; font-weight: 600; color: #6b7280; letter-spacing: 0.06em; text-transform: uppercase; }
+  .filter-select { width: 100%; padding: 7px 28px 7px 11px; font-size: 12.5px; font-family: inherit; color: #111827; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") no-repeat right 10px center; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; -webkit-appearance: none; appearance: none; transition: border-color 0.15s; }
+  .filter-select:focus { outline: none; border-color: #93c5fd; }
+  .filter-select.active { background-color: #eff6ff; border-color: #93c5fd; color: #1d4ed8; }
+  .btn-clear { height: 34px; padding: 0 12px; font-size: 12px; font-family: inherit; color: #6b7280; background: transparent; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; white-space: nowrap; display: none; align-items: center; gap: 5px; align-self: flex-end; }
+  .btn-clear:hover { border-color: #d1d5db; color: #374151; }
+  .btn-clear.visible { display: flex; }
+
+  /* Funnel legend */
+  .funnel-legend { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 7px 12px; flex: 1; min-width: 200px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .legend-dot.tof { background: #0F6E56; }
+  .legend-dot.mof { background: #185FA5; }
+  .legend-dot.bof { background: #854F0B; }
+  .legend-text { font-size: 11.5px; color: #374151; line-height: 1.4; }
+  .legend-text strong { font-weight: 600; color: #111827; }
+
+  /* Cards grid */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+
+  /* Resource card */
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 9px; transition: box-shadow 0.15s; }
+  .card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .card-name { font-size: 13.5px; font-weight: 600; color: #111827; line-height: 1.35; }
+  .stage-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+  .stage-badge.tof { background: #E1F5EE; color: #0F6E56; }
+  .stage-badge.tof-row { background: #E1F5EE; color: #0F6E56; }
+  .stage-badge.mof { background: #E6F1FB; color: #185FA5; }
+  .stage-badge.bof { background: #FAEEDA; color: #854F0B; }
+  .card-desc { font-size: 12px; color: #6b7280; line-height: 1.55; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag { font-size: 10.5px; padding: 2px 8px; border-radius: 20px; background: #f3f4f6; color: #374151; }
+  .tag.software { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  .card-warn { font-size: 11px; color: #92400e; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 6px; padding: 5px 8px; display: flex; gap: 5px; align-items: flex-start; }
+  .card-actions { display: flex; gap: 6px; flex-wrap: wrap; border-top: 1px solid #f3f4f6; padding-top: 10px; margin-top: 2px; }
+  .btn-dl { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-family: inherit; padding: 5px 12px; border-radius: 7px; border: 1px solid #93c5fd; color: #1d4ed8; background: #eff6ff; cursor: pointer; text-decoration: none; font-weight: 500; transition: background 0.1s; }
+  .btn-dl:hover { background: #dbeafe; }
+  .btn-gate { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-family: inherit; padding: 5px 12px; border-radius: 7px; border: 1px solid #e5e7eb; color: #6b7280; background: transparent; cursor: pointer; text-decoration: none; transition: border-color 0.1s; }
+  .btn-gate:hover { border-color: #d1d5db; color: #374151; }
+  .btn-view { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-family: inherit; padding: 5px 12px; border-radius: 7px; border: 1px solid #93c5fd; color: #1d4ed8; background: #eff6ff; cursor: pointer; text-decoration: none; font-weight: 500; }
+  .btn-pending { font-size: 11px; color: #9ca3af; font-style: italic; display: flex; align-items: center; gap: 4px; }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 3rem 1rem; color: #9ca3af; font-size: 14px; grid-column: 1 / -1; }
+
+  /* Section divider */
+  .section-divider { display: flex; align-items: center; gap: 10px; margin: 4px 0 12px; grid-column: 1 / -1; }
+  .section-divider span { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+  .section-divider hr { flex: 1; border: none; border-top: 1px solid #e5e7eb; }
+</style>
+</head>
+<body>
+<div class="hub">
+
+  <div class="hub-header">
+    <div>
+      <div class="hub-title">Lightyear Content Hub</div>
+      <div class="hub-subtitle">Find the right resource for every stage of the sale</div>
+    </div>
+    <div class="hub-count" id="count">Loading…</div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label class="filter-label" for="f-stage">Funnel stage</label>
+      <select class="filter-select" id="f-stage" onchange="applyFilters()">
+        <option value="">All stages</option>
+        <option value="Top of Funnel">Top of Funnel (ToF)</option>
+        <option value="Middle of Funnel">Middle of Funnel (MoF)</option>
+        <option value="Bottom of Funnel">Bottom of Funnel (BoF)</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label" for="f-region">Region</label>
+      <select class="filter-select" id="f-region" onchange="applyFilters()">
+        <option value="">All regions</option>
+        <option value="Global">Global</option>
+        <option value="United Kingdom">United Kingdom</option>
+        <option value="Australia">Australia</option>
+        <option value="New Zealand">New Zealand</option>
+        <option value="Ireland">Ireland</option>
+        <option value="US">US</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label" for="f-industry">Industry</label>
+      <select class="filter-select" id="f-industry" onchange="applyFilters()">
+        <option value="">All industries</option>
+        <option value="Broad">Broad</option>
+        <option value="Hospitality">Hospitality</option>
+        <option value="Accountants & Bookkeepers">Accountants &amp; Bookkeepers</option>
+        <option value="Accountant">Accountant</option>
+        <option value="Care">Care</option>
+        <option value="Construction">Construction</option>
+        <option value="Education">Education</option>
+        <option value="Financial Advisors">Financial Advisors</option>
+        <option value="Healthcare">Healthcare</option>
+        <option value="Logistics">Logistics</option>
+        <option value="Retail">Retail</option>
+        <option value="Services">Services</option>
+        <option value="Telecommunications">Telecommunications</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label" for="f-type">Content type</label>
+      <select class="filter-select" id="f-type" onchange="applyFilters()">
+        <option value="">All types</option>
+        <option value="Checklist">Checklist</option>
+        <option value="Interactive quiz">Interactive quiz</option>
+        <option value="Interactive calculator">Interactive calculator</option>
+        <option value="Case study pack">Case study pack</option>
+        <option value="Case Study">Case study</option>
+        <option value="Competitor Comparison">Competitor comparison</option>
+        <option value="Editable template">Editable template</option>
+        <option value="Playbook">Playbook</option>
+        <option value="eBook">eBook</option>
+        <option value="Brochure">Brochure</option>
+        <option value="Guide">Product guide</option>
+      </select>
+    </div>
+    <button class="btn-clear" id="btn-clear" onclick="clearFilters()">
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1 1l9 9M10 1L1 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Clear
+    </button>
+  </div>
+
+  <!-- Funnel legend -->
+  <div class="funnel-legend">
+    <div class="legend-item">
+      <div class="legend-dot tof"></div>
+      <div class="legend-text"><strong>ToF — Top of Funnel:</strong> Use these to start the conversation. Great for cold outreach and early-stage prospects who aren't yet evaluating tools.</div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot mof"></div>
+      <div class="legend-text"><strong>MoF — Middle of Funnel:</strong> Use these when a prospect is actively comparing options. Helps them build the case internally and shortlist Lightyear.</div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot bof"></div>
+      <div class="legend-text"><strong>BoF — Bottom of Funnel:</strong> Use these to close. Ideal for prospects who are close to a decision and need proof, pricing context, or a final nudge.</div>
+    </div>
+  </div>
+
+  <div class="cards-grid" id="cards-grid"></div>
+
+</div>
+
+<script>
+// ─── RESOURCES DATA ───────────────────────────────────────────────────────────
+const RESOURCES = [
+  { name:"AP Audit Checklist", desc:"A self-assessment to identify inefficiencies and gaps in your current AP process.", audience:"General Finance Team", stage:"Top of Funnel", industry:"Broad", type:"Checklist", region:"Global", gate:"https://www.lightyear.cloud/ap-audit-checklist/", dl:"https://pages.theaccessgroup.com/rs/302-WOS-863/images/AP%20Checklist.pdf?version=0", gated:false },
+  { name:"AP Provider / Supplier Checklist", desc:"A structured checklist to evaluate and compare AP automation providers.", audience:"General Finance Team", stage:"Top of Funnel", industry:"Broad", type:"Checklist", region:"Global", gate:"https://www.lightyear.cloud/plugging-the-gaps/", dl:"https://accessukltd-my.sharepoint.com/personal/chris_gregg_theaccessgroup_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fchris%5Fgregg%5Ftheaccessgroup%5Fcom%2FDocuments%2Fchris%40lightyear%2Ecloud%2FLightyear%20All%20Staff%2FMarketing%2FCampaigns%2FPlugging%20the%20gaps%20with%20the%20right%20provider%20checklist%2Epdf&parent=%2Fpersonal%2Fchris%5Fgregg%5Ftheaccessgroup%5Fcom%2FDocuments%2Fchris%40lightyear%2Ecloud%2FLightyear%20All%20Staff%2FMarketing%2FCampaigns", gated:true },
+  { name:"Cost Savings Checklist", desc:"Helps hospitality finance teams quantify the potential savings from AP automation.", audience:"General Finance Team", stage:"Top of Funnel", industry:"Hospitality", type:"Checklist", region:"Global", gate:"https://www.lightyear.cloud/resources/cost-saving-checklist-for-hospitality/", dl:"https://accessukltd.sharepoint.com/teams/ERPDivisionMST/SiteAssets/Forms/AllItems.aspx?id=%2Fteams%2FERPDivisionMST%2FSiteAssets%2FSitePages%2FLightyear%281%29%2F1018246804Hospo%2DCost%2DSavings%2DChecklist%2Epdf", gated:false },
+  { name:"Digital Maturity Quiz", desc:"Interactive quiz to assess where a business sits on the AP automation maturity spectrum.", audience:"General Finance Team", stage:"Top of Funnel", industry:"Broad", type:"Interactive quiz", region:"Global", gate:"https://www.lightyear.cloud/resources/digital-maturity-quiz/", dl:null, gated:false, viewLabel:"Take the quiz" },
+  { name:"Cost Savings Calculator", desc:"Interactive tool that projects AP cost savings based on invoice volume and team size.", audience:"General Finance Team", stage:"Top of Funnel", industry:"Broad", type:"Interactive calculator", region:"Global", gate:"https://www.lightyear.cloud/ap-automation-cost-savings/", dl:null, gated:false, viewLabel:"View calculator" },
+  { name:"RFP Template", desc:"Ready-to-use template for finance teams building an internal case to evaluate AP vendors.", audience:"Finance Decision Makers", stage:"Middle of Funnel", industry:"Broad", type:"Editable template", region:"Global", gate:"https://www.lightyear.cloud/request-for-proposal-template/", dl:"https://pages.theaccessgroup.com/rs/302-WOS-863/images/AP%20Vendor%20RFP%20Template%20-%20Customise%20%26%20Send.xlsx?version=0", gated:true },
+  { name:"Product Feature Guide", desc:"A comprehensive overview of Lightyear's features and capabilities.", audience:"Finance Decision Makers", stage:"Middle of Funnel", industry:"Broad", type:"Guide", region:"Global", gate:"https://www.lightyear.cloud/lightyear-product-feature-guide/", dl:"https://pages.theaccessgroup.com/rs/302-WOS-863/images/LightyearProductFeatureGuide.pdf?version=0", gated:true },
+  { name:"Price Feature Comparison", desc:"Side-by-side comparison of Lightyear against competitors on price and key features.", audience:"Finance Decision Makers", stage:"Middle of Funnel", industry:"Broad", type:"Competitor Comparison", region:"Global", gate:"https://www.lightyear.cloud/price-feature-comparison-matrix/", dl:"https://pages.theaccessgroup.com/rs/302-WOS-863/images/Lightyear%20Positioning%20Matrix%20.pdf?version=1", gated:true },
+  { name:"Case Study Pack UK", desc:"Curated collection of UK customer case studies showing cost savings and process efficiency.", audience:"General Finance Team", stage:"Middle of Funnel", industry:"Broad", type:"Case study pack", region:"United Kingdom", gate:"https://www.lightyear.cloud/case-study-pack-uk/", dl:"https://pages.theaccessgroup.com/rs/302-WOS-863/images/Case%20study%20pack%20-%20broad%20campaign%20UK.pdf?version=1", gated:true },
+  { name:"Case Study Pack AU", desc:"Curated collection of AU customer case studies demonstrating real-world AP automation results.", audience:"General Finance Team", stage:"Middle of Funnel", industry:"Broad", type:"Case study pack", region:"Australia", gate:"https://www.lightyear.cloud/case-study-pack-au/", dl:"https://pages.theaccessgroup.com/rs/302-WOS-863/images/Case%20study%20pack%20-%20broad%20campaign%20%283%29.pdf?version=0", gated:true },
+  { name:"AP Implementation eBook", desc:"A practical guide to rolling out AP automation — from stakeholder buy-in to go-live.", audience:"Finance Decision Makers", stage:"Middle of Funnel", industry:"Broad", type:"eBook", region:"Global", gate:"https://www.lightyear.cloud/implementation-ebook/", dl:"https://pages.theaccessgroup.com/rs/302-WOS-863/images/LY-Implementation%20eBook.png?version=1", gated:true },
+  { name:"Staffing Challenges eBook", desc:"Explores how lean hospitality finance teams are managing manual AP workloads — and what the alternative looks like.", audience:"General Finance Team", stage:"Middle of Funnel", industry:"Hospitality", type:"eBook", region:"Global", gate:"https://www.lightyear.cloud/hospitality-ap-automation-ebook/", dl:"https://accessukltd.sharepoint.com/teams/ERPDivisionMST/SiteAssets/Forms/AllItems.aspx?id=%2Fteams%2FERPDivisionMST%2FSiteAssets%2FSitePages%2FLightyear%281%29%2F1270287795Hospitality%2DeBook%2D%2D1%2D%2Epdf&parent=%2Fteams%2FERPDivisionMST%2FSiteAssets%2FSitePages%2FLightyear%281%29&or=EXCEL%2DWEB%2EBODY%2ENT&ct=1779101991439", gated:true },
+  { name:"Peak Season Playbook", desc:"Guides hospitality teams through managing high invoice volumes during peak trading periods.", audience:"Finance Decision Makers", stage:"Middle of Funnel", industry:"Hospitality", type:"Playbook", region:"Global", gate:"https://www.lightyear.cloud/resources/hospitality-peak-season-prep-guide/", dl:"https://pages.theaccessgroup.com/rs/302-WOS-863/images/LightyearHospoPrepGuide%28SPInteractive%29.pdf?version=0", gated:true },
+  { name:"ROI Payback Calculator", desc:"Shows projected payback period and ROI for Lightyear based on prospect-specific inputs.", audience:"Finance Decision Makers", stage:"Middle of Funnel", industry:"Broad", type:"Interactive calculator", region:"Global", gate:"https://www.lightyear.cloud/resources/ap-automation-roi-calculator/", dl:null, gated:false, viewLabel:"View calculator" },
+  { name:"Competitor Comparison Matrix", desc:"In-depth guide comparing Lightyear against leading AP automation providers.", audience:"Finance Decision Makers", stage:"Middle of Funnel", industry:"Broad", type:"Competitor Comparison", region:"Global", gate:"https://www.lightyear.cloud/accounts-payable-provider-comparison-guide/", dl:"https://www.lightyear.cloud/for-business/accounts-payable-solution-comparison/", gated:true },
+  { name:"Business Case Template", desc:"Editable template to help finance teams present the internal case for AP automation investment.", audience:"Finance Decision Makers", stage:"Middle of Funnel", industry:"Broad", type:"Editable template", region:"Global", gate:"https://www.lightyear.cloud/resources/ap-automation-business-case-resource/", dl:"https://pages.theaccessgroup.com/rs/302-WOS-863/images/AP%20Automation%20Business%20Case%20By%20Lightyear.pptx?version=2", gated:true },
+  { name:"Mayday: Scaling with Xero eBook", desc:"A guide to scaling with Xero for groups — Lightyear is featured.", audience:"Finance Decision Makers", stage:"Middle of Funnel", industry:"Broad", type:"eBook", region:"Global", gate:null, dl:"https://accessukltd-my.sharepoint.com/personal/chris_gregg_theaccessgroup_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fchris%5Fgregg%5Ftheaccessgroup%5Fcom%2FDocuments%2Fchris%40lightyear%2Ecloud%2FLightyear%20All%20Staff%2FMarketing%2FCase%20Studies%20%20eBooks%2FMayday%20Xero%20eBook%2FYour%20ULTIMATE%20guide%20Xero%20For%20Groups%2Epdf&parent=%2Fpersonal%2Fchris%5Fgregg%5Ftheaccessgroup%5Fcom%2FDocuments%2Fchris%40lightyear%2Ecloud%2FLightyear%20All%20Staff%2FMarketing%2FCase%20Studies%20%20eBooks%2FMayday%20Xero%20eBook", gated:false },
+  { name:"Implementation Template", desc:"Step-by-step AP automation implementation plan, editable for each prospect.", audience:"Finance Decision Makers", stage:"Middle of Funnel", industry:"Broad", type:"Editable template", region:"Global", gate:"https://www.lightyear.cloud/form/the-ap-automation-implementation-plan/", dl:"https://pages.theaccessgroup.com/rs/302-WOS-863/images/AP%20Implementation%20Template.pdf?version=1", gated:true },
+  { name:"MTD Playbook", desc:"A practical guide to Making Tax Digital compliance for UK finance teams.", audience:"Finance Decision Makers", stage:"Middle of Funnel", industry:"Broad", type:"Playbook", region:"United Kingdom", gate:"https://www.lightyear.cloud/form/mtd-playbook/", dl:"https://pages.theaccessgroup.com/rs/302-WOS-863/images/MTD%20Playbook.pdf?version=2", gated:true },
+  { name:"Accountant eBook", desc:"How accounting practices can use AP automation to boost client success and scale their service.", audience:"Accountants", stage:"Middle of Funnel", industry:"Accountant", type:"eBook", region:"Global", gate:"https://www.lightyear.cloud/ap-automation-for-accounting-practices-ebook/", dl:"https://www.lightyear.cloud/media/fbqhljpt/boosting-client-success-with-ap-automation.pdf", gated:true },
+  { name:"Lightyear Brochure", desc:"A concise overview of Lightyear's product, key benefits, and customer outcomes.", audience:"Finance Decision Makers", stage:"Bottom of Funnel", industry:"Broad", type:"Brochure", region:"Global", gate:"https://www.lightyear.cloud/contact/brochure-form/", dl:"https://accessukltd.sharepoint.com/teams/ERP-ProductHub/Shared%20Documents/Forms/AllItems.aspx?id=%2Fteams%2FERP%2DProductHub%2FShared%20Documents%2FLightyear%2FDigital%20Brochures%2FLightyear%20Brochure%2Epdf&parent=%2Fteams%2FERP%2DProductHub%2FShared%20Documents%2FLightyear%2FDigital%20Brochures", gated:true },
+];
+
+// ─── CASE STUDIES DATA ───────────────────────────────────────────────────────
+const CASE_STUDIES = [
+  { name:"Exchange Hotel and Ami Who", stage:"Bottom of Funnel", region:"Australia", industry:"Accountants & Bookkeepers", software:"Broad", url:"https://www.lightyear.cloud/resources/case-studies/exchange-hotel-and-ami-who/" },
+  { name:"TCS Guernsey", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Accountants & Bookkeepers", software:"Broad", url:"https://www.lightyear.cloud/resources/case-studies/tcs-guernsey-case-study/" },
+  { name:"Launch Office Solutions", stage:"Bottom of Funnel", region:"New Zealand", industry:"Accountants & Bookkeepers", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/launch-office-solutions/" },
+  { name:"Bilanz", stage:"Bottom of Funnel", region:"Australia", industry:"Accountants & Bookkeepers", software:"Broad", url:"https://www.lightyear.cloud/resources/case-studies/bilanz/" },
+  { name:"Evergreen Care", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Care", software:"Sage 50", url:"https://www.lightyear.cloud/resources/case-studies/evergreen-care-ap-automation-case-study/" },
+  { name:"Curtin Heritage Living", stage:"Bottom of Funnel", region:"Australia", industry:"Care", software:"Inerva", url:"https://www.lightyear.cloud/resources/case-studies/how-curtin-heritage-living-used-ap-automation-to-enhance-their-care-offering/" },
+  { name:"St Basils Homes", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Care", software:"Inerva", url:"https://www.lightyear.cloud/resources/case-studies/st-basils-homes/" },
+  { name:"The Royce Care", stage:"Bottom of Funnel", region:"Australia", industry:"Care", software:"Inerva", url:"https://www.lightyear.cloud/resources/case-studies/the-royce-aged-care/" },
+  { name:"Stonehaven Care Group", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Care", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/stonehaven-care-group/" },
+  { name:"Allendale", stage:"Bottom of Funnel", region:"Australia", industry:"Construction", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/allendale-electrical/" },
+  { name:"WG Carter Construction", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Construction", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/wg-carter-construction/" },
+  { name:"Inspire Learning Trust", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Education", software:"Sage 200", url:"https://www.lightyear.cloud/resources/case-studies/inspire-learning-trust/" },
+  { name:"Withington Girls' School", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Education", software:"Access Financials", url:"https://www.lightyear.cloud/resources/case-studies/withington-girls-school/" },
+  { name:"ESMS", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Education", software:"WCBS", url:"https://www.lightyear.cloud/resources/case-studies/esms-case-study/" },
+  { name:"Dean Close School", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Education", software:"WCBS", url:"https://www.lightyear.cloud/resources/case-studies/dean-close/" },
+  { name:"Loddon Foundation", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Education", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/loddon-foundation/" },
+  { name:"Quantaco", stage:"Bottom of Funnel", region:"Australia", industry:"Financial Advisors", software:"Broad", url:"https://www.lightyear.cloud/resources/case-studies/quantaco-australia-ap-automation-case-study/" },
+  { name:"ABL Corp", stage:"Bottom of Funnel", region:"Australia", industry:"Financial Advisors", software:"Broad", url:"https://www.lightyear.cloud/resources/case-studies/abl-corp/" },
+  { name:"Mookai Rosie", stage:"Bottom of Funnel", region:"Australia", industry:"Healthcare", software:"Access Attache", url:"https://www.lightyear.cloud/resources/case-studies/mookai-rosie-bi-bayan/" },
+  { name:"Synapse", stage:"Bottom of Funnel", region:"Australia", industry:"Healthcare", software:"MYOB Acumatica", url:"https://www.lightyear.cloud/resources/case-studies/synapse/" },
+  { name:"Healthcare Ireland", stage:"Bottom of Funnel", region:"Ireland", industry:"Healthcare", software:"AccountsIQ", url:"https://www.lightyear.cloud/resources/case-studies/healthcare-ireland-case-study/" },
+  { name:"Cedar Foundation", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Healthcare", software:"Sage 50", url:"https://www.lightyear.cloud/resources/case-studies/cedar-foundation/" },
+  { name:"Wishlist", stage:"Bottom of Funnel", region:"Australia", industry:"Healthcare", software:"MYOB", url:"https://www.lightyear.cloud/resources/case-studies/wishlist/" },
+  { name:"Good Spirits Hospitality", stage:"Bottom of Funnel", region:"Australia", industry:"Hospitality", software:"NetSuite", url:"https://www.lightyear.cloud/resources/case-studies/good-spirits-hospitality/" },
+  { name:"Vanilla Blue", stage:"Bottom of Funnel", region:"Australia", industry:"Hospitality", software:"MYOB", url:"https://www.lightyear.cloud/resources/case-studies/vanilla-blue-catering/" },
+  { name:"Maroochy RSL", stage:"Bottom of Funnel", region:"Australia", industry:"Hospitality", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/maroochy-rsl/" },
+  { name:"Vikings Group", stage:"Bottom of Funnel", region:"Australia", industry:"Hospitality", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/vikings-group/" },
+  { name:"Salter Brothers Hospitality", stage:"Bottom of Funnel", region:"Australia", industry:"Hospitality", software:"NetSuite", url:"https://www.lightyear.cloud/resources/case-studies/salter-brothers-hospitality/" },
+  { name:"Plate It Forward", stage:"Bottom of Funnel", region:"Australia", industry:"Hospitality", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/plate-it-forward/" },
+  { name:"Rare Steakhouse", stage:"Bottom of Funnel", region:"Australia", industry:"Hospitality", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/rare-steakhouse-case-study/" },
+  { name:"Wahlburgers", stage:"Bottom of Funnel", region:"Australia", industry:"Hospitality", software:"MYOB Acumatica", url:"https://www.lightyear.cloud/resources/case-studies/wahlburgers/" },
+  { name:"Queensway", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Hospitality", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/queensway/" },
+  { name:"Windmill NI", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Hospitality", software:"Sage 200", url:"https://www.lightyear.cloud/resources/case-studies/windmill-ni-and-burger-king-case-study/" },
+  { name:"Soho Theatre", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Hospitality", software:"Sage Intacct", url:"https://www.lightyear.cloud/resources/case-studies/soho-theatre/" },
+  { name:"3Sheets Restaurants", stage:"Bottom of Funnel", region:"Australia", industry:"Hospitality", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/3sheets-restaurants/" },
+  { name:"Pizza Pilgrims", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Hospitality", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/pizza-pilgrims/" },
+  { name:"Laundy Hotels", stage:"Bottom of Funnel", region:"Australia", industry:"Hospitality", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/laundy-hotels/" },
+  { name:"Clandeboye Lodge", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Hospitality", software:"Sage", url:"https://www.lightyear.cloud/resources/case-studies/clandeboye-lodge/" },
+  { name:"City Golf", stage:"Bottom of Funnel", region:"Australia", industry:"Hospitality", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/city-golf-get-a-cfo/" },
+  { name:"Cambridge United", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Hospitality", software:"Sage", url:"https://www.lightyear.cloud/resources/case-studies/cambridge-united-football-club/" },
+  { name:"Johns Bowling Club", stage:"Bottom of Funnel", region:"Australia", industry:"Hospitality", software:"Adept", url:"https://www.lightyear.cloud/resources/case-studies/st-johns-bowling-club/" },
+  { name:"Ulster Rugby", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Hospitality", software:"Sage 200", url:"https://www.lightyear.cloud/resources/case-studies/ulster-rugby-case-study/" },
+  { name:"Goli", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Hospitality", software:"Xero", url:"https://www.lightyear.cloud/company-blog/learn-how-one-of-the-biggest-black-friday-suppliers-have-scaled-their-business-with-lightyear/" },
+  { name:"Future Transfer", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Logistics", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/future-transfer/" },
+  { name:"Jenki Matcha", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Retail", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/jenki-matcha/" },
+  { name:"SWD Group", stage:"Bottom of Funnel", region:"Australia", industry:"Retail", software:"Pronto", url:"https://www.lightyear.cloud/resources/case-studies/specialised-wholesale-distribution/" },
+  { name:"Pure Gelato", stage:"Bottom of Funnel", region:"Australia", industry:"Retail", software:"MYOB", url:"https://www.lightyear.cloud/resources/case-studies/pure-gelato/" },
+  { name:"Henderson Group", stage:"Bottom of Funnel", region:"United Kingdom", industry:"Retail", software:"Agresso", url:"https://www.lightyear.cloud/resources/case-studies/henderson-group/" },
+  { name:"Strandbags", stage:"Bottom of Funnel", region:"Australia", industry:"Retail", software:"Infor Sunsystems", url:"https://www.lightyear.cloud/resources/case-studies/strandbags/" },
+  { name:"Flinders General Store", stage:"Bottom of Funnel", region:"Australia", industry:"Retail", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/flinders-general-store/" },
+  { name:"The Reddrop Group", stage:"Bottom of Funnel", region:"Australia", industry:"Retail", software:"Sage", url:"https://www.lightyear.cloud/resources/case-studies/the-reddrop-group/" },
+  { name:"Hosted Network", stage:"Bottom of Funnel", region:"Australia", industry:"Telecommunications", software:"Xero", url:"https://www.lightyear.cloud/resources/case-studies/hosted-network/" },
+  { name:"WhiteWater", stage:"Bottom of Funnel", region:"US", industry:"Services", software:"Sage Intacct", url:"https://www.lightyear.cloud/resources/case-studies/whitewater-case-study/" },
+];
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function stageClass(s) {
+  if (s.trim().startsWith("Top")) return "tof";
+  if (s.trim().startsWith("Middle")) return "mof";
+  return "bof";
+}
+function stageLabel(s) {
+  if (s.trim().startsWith("Top")) return "ToF";
+  if (s.trim().startsWith("Middle")) return "MoF";
+  return "BoF";
+}
+
+function iconDownload() {
+  return `<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v7M3.5 5.5l3 3 3-3M2 10.5h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function iconLink() {
+  return `<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M10 6H3m5-2.5l2.5 2.5L8 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function iconLock() {
+  return `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="5" width="8" height="6" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 5V3.5a2 2 0 0 1 4 0V5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`;
+}
+
+// ─── CARD BUILDERS ───────────────────────────────────────────────────────────
+function buildResourceCard(r) {
+  const sc = stageClass(r.stage);
+  const sl = stageLabel(r.stage);
+  const warn = r.warn ? `<div class="card-warn">⚠️ ${r.warn}</div>` : "";
+
+  let actions = "";
+  if (!r.dl && !r.gate) {
+    actions = `<span class="btn-pending">⏳ Link pending</span>`;
+  } else {
+    if (r.dl) {
+      actions += `<a class="btn-dl" href="${r.dl}" target="_blank" rel="noopener">${iconDownload()} Download</a>`;
+    }
+    if (r.gate && r.dl) {
+      actions += `<a class="btn-gate" href="${r.gate}" target="_blank" rel="noopener">${iconLock()} Gated link</a>`;
+    } else if (r.gate && !r.dl) {
+      const label = r.viewLabel || "Open";
+      actions += `<a class="btn-dl" href="${r.gate}" target="_blank" rel="noopener">${iconLink()} ${label}</a>`;
+    }
+  }
+
+  return `<div class="card" data-stage="${r.stage}" data-region="${r.region}" data-industry="${r.industry}" data-type="${r.type}">
+    <div class="card-top">
+      <div class="card-name">${r.name}</div>
+      <span class="stage-badge ${sc}">${sl}</span>
+    </div>
+    <div class="card-desc">${r.desc}</div>
+    <div class="card-tags">
+      <span class="tag">${r.audience}</span>
+      <span class="tag">${r.type}</span>
+      ${r.industry !== "Broad" ? `<span class="tag">${r.industry}</span>` : ""}
+      ${r.region !== "Global" ? `<span class="tag">${r.region}</span>` : ""}
+    </div>
+    ${warn}
+    <div class="card-actions">${actions}</div>
+  </div>`;
+}
+
+function buildCaseStudyCard(cs) {
+  const sc = stageClass(cs.stage);
+  const sl = stageLabel(cs.stage);
+  const swTag = cs.software && cs.software !== "Broad" ? `<span class="tag software">${cs.software}</span>` : "";
+  return `<div class="card" data-stage="${cs.stage}" data-region="${cs.region}" data-industry="${cs.industry}" data-type="Case Study">
+    <div class="card-top">
+      <div class="card-name">${cs.name}</div>
+      <span class="stage-badge ${sc}">${sl}</span>
+    </div>
+    <div class="card-desc">Customer case study — real-world results from a Lightyear implementation.</div>
+    <div class="card-tags">
+      <span class="tag">${cs.industry}</span>
+      <span class="tag">${cs.region}</span>
+      ${swTag}
+    </div>
+    <div class="card-actions">
+      <a class="btn-view" href="${cs.url}" target="_blank" rel="noopener">${iconLink()} View case study</a>
+    </div>
+  </div>`;
+}
+
+// ─── FILTER + RENDER ─────────────────────────────────────────────────────────
+function applyFilters() {
+  const stage    = document.getElementById("f-stage").value;
+  const region   = document.getElementById("f-region").value;
+  const industry = document.getElementById("f-industry").value;
+  const type     = document.getElementById("f-type").value;
+
+  ["f-stage","f-region","f-industry","f-type"].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.toggle("active", !!el.value);
+  });
+  const hasFilter = stage || region || industry || type;
+  document.getElementById("btn-clear").classList.toggle("visible", hasFilter);
+
+  // Combine all items
+  const allResources = RESOURCES.map(r => ({ ...r, _type: "resource" }));
+  const allCaseStudies = CASE_STUDIES.map(cs => ({ ...cs, _type: "case_study" }));
+  const allItems = [...allResources, ...allCaseStudies];
+
+  const filtered = allItems.filter(item => {
+    if (stage && !item.stage.trim().startsWith(stage.split(" ")[0])) return false;
+    if (region && item.region !== region) return false;
+    if (industry && item.industry !== industry) return false;
+    if (type) {
+      if (type === "Case Study" && item._type !== "case_study") return false;
+      if (type !== "Case Study" && item._type === "case_study") return false;
+      if (type !== "Case Study" && item.type !== type) return false;
+    }
+    return true;
+  });
+
+  const grid = document.getElementById("cards-grid");
+  const total = RESOURCES.length + CASE_STUDIES.length;
+  document.getElementById("count").textContent =
+    filtered.length === total ? `${total} resources` : `${filtered.length} of ${total}`;
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty">No resources match these filters.</div>`;
+    return;
+  }
+
+  // Separate and render with section dividers if not filtering by type
+  const showResources = filtered.filter(i => i._type === "resource");
+  const showCaseStudies = filtered.filter(i => i._type === "case_study");
+
+  let html = "";
+  if (showResources.length) {
+    if (!type || type !== "Case Study") {
+      html += `<div class="section-divider"><span>Marketing resources</span><hr></div>`;
+      html += showResources.map(buildResourceCard).join("");
+    }
+  }
+  if (showCaseStudies.length) {
+    if (!type || type === "Case Study") {
+      html += `<div class="section-divider"><span>Case studies</span><hr></div>`;
+      html += showCaseStudies.map(buildCaseStudyCard).join("");
+    }
+  }
+  grid.innerHTML = html;
+}
+
+function clearFilters() {
+  ["f-stage","f-region","f-industry","f-type"].forEach(id => {
+    document.getElementById(id).value = "";
+    document.getElementById(id).classList.remove("active");
+  });
+  document.getElementById("btn-clear").classList.remove("visible");
+  applyFilters();
+}
+
+// Init
+applyFilters();
+</script>
+</body>
+</html>
